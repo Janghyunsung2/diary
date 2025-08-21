@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>일기 목록</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .content-link {
+            color: #007bff;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .content-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<div th:replace="~{navbar :: navbar}"></div>
+<div class="container">
+    <h1 class="mb-4">일기 목록</h1>
+    <table class="table table-bordered table-hover align-middle">
+        <thead class="table-dark">
+        <tr>
+            <th>ID</th>
+            <th>내용</th>
+            <th>감정</th>
+            <th>작성일</th>
+            <th>수정일</th>
+            <th>유저ID</th>
+            <th>공개여부</th>
+            <th>삭제</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="daily : ${dailies.content}">
+            <td th:text="${daily.id}"></td>
+            <td>
+                <a th:href="@{/admin-server/dailies/{id}(id=${daily.id})}" 
+                   class="content-link" 
+                   th:text="${#strings.abbreviate(daily.content, 50)}">내용</a>
+            </td>
+            <td th:text="${daily.emotionType}"></td>
+            <td th:text="${daily.createdAt}"></td>
+            <td th:text="${daily.updatedAt}"></td>
+            <td th:text="${daily.userId}"></td>
+            <td th:text="${daily.visibility ? '공개' : '비공개'}"></td>
+            <td>
+                <form th:action="@{/admin-server/dailies/{id}/delete(id=${daily.id})}" method="post">
+                    <button type="submit" class="btn btn-danger btn-sm">삭제</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <nav>
+        <ul class="pagination justify-content-center">
+            <li class="page-item" th:classappend="${!dailies.hasPrevious()} ? 'disabled'">
+                <a class="page-link" th:href="@{/admin-server/dailies(page=${dailies.number - 1}, size=${dailies.size})}">이전</a>
+            </li>
+            <li class="page-item disabled">
+                <span class="page-link">
+                    페이지 [[${dailies.number + 1}]] / [[${dailies.totalPages}]]
+                </span>
+            </li>
+            <li class="page-item" th:classappend="${!dailies.hasNext()} ? 'disabled'">
+                <a class="page-link" th:href="@{/admin-server/dailies(page=${dailies.number + 1}, size=${dailies.size})}">다음</a>
+            </li>
+        </ul>
+    </nav>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

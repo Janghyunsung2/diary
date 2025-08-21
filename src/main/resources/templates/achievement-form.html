@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>업적 [[${action == 'create' ? '등록' : '수정'}]]</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div th:replace="navbar :: navbar"></div>
+<div class="container">
+    <h1 class="mb-4">업적 [[${action == 'create' ? '등록' : '수정'}]]</h1>
+    <form th:action="@{${action == 'create' ? '/admin-server/achievements/create' : '/admin-server/achievements/update'}}"
+          method="post" enctype="multipart/form-data">
+
+        <input type="hidden" name="code" th:if="${action == 'update'}" th:value="${achievement.code}"/>
+
+        <div class="mb-3" th:if="${action == 'create'}">
+            <label for="code" class="form-label">코드</label>
+            <input type="text" class="form-control" id="code" name="code" required>
+        </div>
+
+        <div class="mb-3" th:if="${action == 'update'}">
+            <label class="form-label">코드</label>
+            <input type="text" class="form-control" th:value="${achievement.code}" readonly>
+        </div>
+
+        <div class="mb-3">
+            <label for="name" class="form-label">이름</label>
+            <input type="text" class="form-control" id="name" name="name"
+                   th:value="${action == 'update' ? achievement.name : ''}" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="description" class="form-label">설명</label>
+            <input type="text" class="form-control" id="description" name="description"
+                   th:value="${action == 'update' ? achievement.description : ''}" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="creditReward" class="form-label">크레딧 보상</label>
+            <input type="number" class="form-control" id="creditReward" name="creditReward"
+                   th:value="${action == 'update' ? achievement.creditReward : ''}" min="1" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="progressValue" class="form-label">진행 값</label>
+            <input type="number" class="form-control" id="progressValue" name="progressValue"
+                   th:value="${action == 'update' ? achievement.progressValue : ''}" min="1" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="image" class="form-label">이미지</label>
+            <input type="file" class="form-control" id="image" name="image"
+                   th:required="${action == 'create'}">
+            <div th:if="${action == 'update' and achievement.iconUrl != null}" class="mt-2">
+                <img th:src="${achievement.iconUrl}" alt="현재 이미지" width="64" height="64"/>
+                <small class="text-muted">새 이미지를 선택하지 않으면 기존 이미지가 유지됩니다.</small>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label for="nextCode" class="form-label">넥스트 코드</label>
+            <select class="form-select" id="nextCode" name="nextCode" th:disabled="${#lists.isEmpty(nextCodes)}">
+                <option value=""
+                        th:selected="${achievement != null and (achievement.nextCode == null or achievement.nextCode == '')}">
+                    없음
+                </option>
+                <option th:each="code : ${nextCodes}"
+                        th:value="${code}"
+                        th:text="${code}"
+                        th:selected="${achievement != null and achievement.nextCode == code}">
+                </option>
+            </select>
+            <small class="text-muted">업적 달성 후 이동할 다음 업적 코드를 선택하세요.</small>
+        </div>
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">
+                [[${action == 'create' ? '등록' : '수정'}]]
+            </button>
+            <a th:href="@{/admin-server/achievements}" class="btn btn-secondary">뒤로가기</a>
+
+            <form th:if="${action == 'update'}"
+                  th:action="@{'/admin-server/achievements/delete/' + ${achievement.code}}"
+                  method="post" style="display: inline;"
+                  onsubmit="return confirm('정말 삭제하시겠습니까?')">
+                <button type="submit" class="btn btn-danger">삭제</button>
+            </form>
+        </div>
+    </form>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

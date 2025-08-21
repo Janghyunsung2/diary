@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>AI 모드 [[${action == 'create' ? '등록' : '수정'}]]</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div th:replace="navbar :: navbar"></div>
+<div class="container">
+    <h1 class="mb-4">AI 모드 [[${action == 'create' ? '등록' : '수정'}]]</h1>
+    <form th:action="@{${action == 'create' ? '/admin-server/ai-modes/create' : '/admin-server/ai-modes/update'}}"
+          method="post" enctype="multipart/form-data">
+        <input type="hidden" name="aiModeId" th:if="${action == 'update'}" th:value="${aiMode.id}"/>
+        <div class="mb-3">
+            <label for="mode" class="form-label">모드</label>
+            <input type="text" class="form-control" id="mode" name="mode"
+                   th:value="${action == 'update' ? aiMode.mode : ''}" required>
+        </div>
+        <div class="mb-3">
+            <label for="label" class="form-label">라벨</label>
+            <input type="text" class="form-control" id="label" name="label"
+                   th:value="${action == 'update' ? aiMode.label : ''}" required>
+        </div>
+        <div class="mb-3">
+            <label for="description" class="form-label">설명</label>
+            <input type="text" class="form-control" id="description" name="description"
+                   th:value="${action == 'update' ? aiMode.description : ''}" required>
+        </div>
+        <div class="mb-3">
+            <label for="image" class="form-label">이미지</label>
+            <input type="file" class="form-control" id="image" name="image" th:required="${action == 'create'}">
+            <div th:if="${action == 'update' and aiMode.imageUrl != null}">
+                <img th:src="${aiMode.imageUrl}" alt="이미지" width="64" height="64"/>
+            </div>
+        </div>
+        <div class="mb-3">
+            <label for="prompt" class="form-label">프롬프트</label>
+            <textarea class="form-control" id="prompt" name="prompt" rows="3" required
+                      th:text="${action == 'update' ? aiMode.prompt : ''}"></textarea>
+        </div>
+        <div class="mb-3">
+            <label for="colorLabel" class="form-label">라밸색</label>
+            <input type="color" class="form-control form-control-color" id="colorLabel" name="colorLabel"
+                   th:value="${action == 'update' ? aiMode.colorLabel : '#000000'}" required>
+        </div>
+        <div class="mb-3">
+            <label for="colorBg" class="form-label">색상</label>
+            <input type="color" class="form-control form-control-color" id="colorBg" name="colorBg"
+                   th:value="${action == 'update' ? aiMode.colorBg : '#000000'}" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="creditAmount" class="form-label">크레딧 금액</label>
+            <input type="number" class="form-control" id="creditAmount" name="creditAmount"
+                   th:value="${action == 'update' ? aiMode.creditAmount : ''}"
+                   min="0" required>
+        </div>
+        <button type="submit" class="btn btn-primary">[[${action == 'create' ? '등록' : '수정'}]]</button>
+        <a th:href="@{/admin-server/ai-modes}" class="btn btn-secondary">뒤로가기</a>
+    </form>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

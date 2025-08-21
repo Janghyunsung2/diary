@@ -1,0 +1,55 @@
+<!-- navbar.html -->
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="navbar">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">관리자</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" th:href="@{/admin-server/admins}">관리자 목록</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/admin-server/dailies}">일기 목록</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/admin-server/users}">유저 목록</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/admin-server/credit-transactions}">크레딧 거래</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/admin-server/achievements}">업적 목록</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/admin-server/ai-modes}">AI 모드 목록</a></li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="logout()">로그아웃</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <script>
+        function logout() {
+            // 쿠키에서 토큰 제거
+            document.cookie = 'adminToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; secure; samesite=strict';
+            // 로그인 페이지로 리다이렉트
+            window.location.href = '/admin-server/login';
+        }
+        
+        // 페이지 로드 시 토큰이 있으면 Authorization 헤더 설정
+        window.addEventListener('load', function() {
+            const token = localStorage.getItem('adminToken');
+            if (token) {
+                // 모든 fetch 요청에 Authorization 헤더 추가
+                const originalFetch = window.fetch;
+                window.fetch = function(url, options = {}) {
+                    if (url.startsWith('/admin-server')) {
+                        options.headers = options.headers || {};
+                        options.headers['Authorization'] = `Bearer ${token}`;
+                    }
+                    return originalFetch(url, options);
+                };
+            }
+        });
+    </script>
+</div>
+</body>
+</html>

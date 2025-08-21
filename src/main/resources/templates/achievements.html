@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>업적 목록</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div th:replace="navbar :: navbar"></div>
+<div class="container">
+    <h1 class="mb-4">업적 목록</h1>
+    <a href="/admin-server/achievements/form" class="btn btn-primary mb-3">
+        업적 등록
+    </a>
+    <table class="table table-bordered table-hover align-middle">
+        <thead class="table-dark">
+        <tr>
+            <th>코드</th>
+            <th>NEXT코드</th>
+            <th>이름</th>
+            <th>설명</th>
+            <th>보상 크레딧</th>
+            <th>진행값</th>
+            <th>생성일</th>
+            <th>아이콘</th>
+            <th>관리</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="ach : ${achievements.content}">
+            <td th:text="${ach.code}"></td>
+            <td th:text="${ach.nextCode != null ? ach.nextCode : '없음'}"></td>
+            <td th:text="${ach.name}"></td>
+            <td th:text="${ach.description}"></td>
+            <td th:text="${ach.creditReward}"></td>
+            <td th:text="${ach.progressValue}"></td>
+            <td th:text="${#temporals.format(ach.createdAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
+            <td>
+                <img th:if="${ach.iconUrl != null}" th:src="${ach.iconUrl}" alt="icon" width="32" height="32"/>
+            </td>
+            <td>
+                <div class="d-flex gap-1">
+                    <a th:href="@{'/admin-server/achievements/form/' + ${ach.code}}" class="btn btn-sm btn-outline-primary">수정</a>
+                    <form th:action="@{'/admin-server/achievements/delete/' + ${ach.code}}" method="post" style="display: inline;"
+                          onsubmit="return confirm('정말 삭제하시겠습니까?')">
+                        <button type="submit" class="btn btn-sm btn-outline-danger">삭제</button>
+                    </form>
+                </div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <nav>
+        <ul class="pagination justify-content-center">
+            <li class="page-item" th:classappend="${!achievements.hasPrevious()} ? 'disabled'">
+                <a class="page-link" th:href="@{/admin-server/achievements(page=${achievements.number - 1}, size=${achievements.size})}">이전</a>
+            </li>
+            <li class="page-item disabled">
+                <span class="page-link">
+                    페이지 [[${achievements.number + 1}]] / [[${achievements.totalPages}]]
+                </span>
+            </li>
+            <li class="page-item" th:classappend="${!achievements.hasNext()} ? 'disabled'">
+                <a class="page-link" th:href="@{/admin-server/achievements(page=${achievements.number + 1}, size=${achievements.size})}">다음</a>
+            </li>
+        </ul>
+    </nav>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
