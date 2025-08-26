@@ -36,9 +36,9 @@ class AchievementServiceImpl : AchievementService {
     @Transactional
     @Throws(Exception::class)
     override fun registerAchievement(request: AchievementRegisterRequest): AchievementResponse {
-        val iconUrl: String = objectStorage.uploadFile(request.image)
+        val iconUrl: String? = objectStorage.uploadFile(request.image)
         val achievement: Achievement = achievementMapper.toEntity(request)
-        achievement.addIconUrl(iconUrl)
+        iconUrl?.let { achievement.addIconUrl(it) }
         val savedAchievement: Achievement = achievementRepository.save(achievement)
 
         return achievementMapper.toResponse(savedAchievement)
@@ -57,7 +57,7 @@ class AchievementServiceImpl : AchievementService {
     @Transactional
     @Throws(Exception::class)
     override fun updateAchievement(code: String, request: AchievementUpdateRequest): AchievementResponse {
-        val iconUrl: String = objectStorage.uploadFile(request.image)
+        val iconUrl: String? = objectStorage.uploadFile(request.image)
         val achievement: Achievement = achievementRepository.findById(code)
             .orElseThrow({ AchievementNotFoundException(code) })
         achievement.update(

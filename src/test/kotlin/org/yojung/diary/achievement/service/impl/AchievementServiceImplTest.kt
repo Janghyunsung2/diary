@@ -36,7 +36,7 @@ class AchievementServiceImplTest : BehaviorSpec( {
     given("업적 등록 서비스가 주어졌을 때") {
         `when`("업적 서비스가 등록될 때") {
             then("업적이 성공적으로 등록되어야 한다") {
-                var image = mockk<MultipartFile>();
+                val image = mockk<MultipartFile>()
                 val request = AchievementRegisterRequest(
                     code = "testCode",
                     nextCode = "nextCode",
@@ -44,7 +44,7 @@ class AchievementServiceImplTest : BehaviorSpec( {
                     description = "This is a test achievement",
                     creditReward = 10,
                     progressValue = 1,
-                    image = image,
+                    image = image
                 )
                 val response = AchievementResponse(
                     code = "testCode",
@@ -58,22 +58,20 @@ class AchievementServiceImplTest : BehaviorSpec( {
                 )
 
                 val achievement = Achievement(
-                    code = request.code,
+                    code = request.code ?: "testCode",
                     nextCode = request.nextCode,
                     name = request.name,
                     description = request.description,
                     creditReward = request.creditReward,
-                    iconUrl = response.iconUrl,
+                    iconUrl = response.iconUrl ?: "http://example.com/image.jpg",
                     progressValue = request.progressValue
                 )
-                every { objectStorage.uploadFile(any()) } returns response.iconUrl
-                every { achievementMapper.toEntity(any())} returns achievement
+                every { objectStorage.uploadFile(any()) } returns achievement.iconUrl
+                every { achievementMapper.toEntity(any()) } returns achievement
                 every { achievementMapper.toResponse(any()) } returns response
-
                 every { achievementRepository.save<Achievement>(any()) } returns achievement
 
-
-                var achievementResponse = achievementService.registerAchievement(request)
+                val achievementResponse = achievementService.registerAchievement(request)
 
                 assertNotNull(achievementResponse)
                 assertEquals(response.code, achievementResponse.code)
@@ -83,7 +81,6 @@ class AchievementServiceImplTest : BehaviorSpec( {
                 assertEquals(response.creditReward, achievementResponse.creditReward)
                 assertEquals(response.progressValue, achievementResponse.progressValue)
                 assertEquals(response.iconUrl, achievementResponse.iconUrl)
-
             }
         }
     }
@@ -91,8 +88,9 @@ class AchievementServiceImplTest : BehaviorSpec( {
     given("업적 수정 서비스가 주어졌을 때") {
         `when`("업적 서비스가 수정될 때") {
             then("업적이 성공적으로 수정되어야 한다") {
-                var image = mockk<MultipartFile>();
+                val image = mockk<MultipartFile>()
                 val request = org.yojung.diary.achievement.dto.AchievementUpdateRequest(
+                    code = "testCode",
                     name = "Updated Achievement",
                     nextCode = "nextCode",
                     description = "This is an updated achievement",
@@ -117,18 +115,16 @@ class AchievementServiceImplTest : BehaviorSpec( {
                     name = request.name,
                     description = request.description,
                     creditReward = request.creditReward,
-                    iconUrl = response.iconUrl,
+                    iconUrl = response.iconUrl ?: "http://example.com/image.jpg",
                     progressValue = request.progressValue
                 )
                 every { objectStorage.uploadFile(any()) } returns response.iconUrl
-                every { achievementMapper.toEntity(any())} returns achievement
+                every { achievementMapper.toEntity(any()) } returns achievement
                 every { achievementMapper.toResponse(any()) } returns response
-
                 every { achievementRepository.findById("testCode") } returns java.util.Optional.of(achievement)
                 every { achievementRepository.save<Achievement>(any()) } returns achievement
 
-                var achievementResponse =
-                    achievementService.updateAchievement("testCode", request)
+                val achievementResponse = achievementService.updateAchievement("testCode", request)
 
                 assertNotNull(achievementResponse)
                 assertEquals(response.code, achievementResponse.code)
@@ -138,11 +134,9 @@ class AchievementServiceImplTest : BehaviorSpec( {
                 assertEquals(response.creditReward, achievementResponse.creditReward)
                 assertEquals(response.progressValue, achievementResponse.progressValue)
                 assertEquals(response.iconUrl, achievementResponse.iconUrl)
-
             }
         }
     }
-
 
     given("업적 조회 서비스가 주어졌을 때") {
         `when`("업적 서비스가 조회될 때") {
@@ -157,19 +151,21 @@ class AchievementServiceImplTest : BehaviorSpec( {
                     progressValue = 1
                 )
                 val response = AchievementResponse(
-                    code = achievement.getCode(),
-                    nextCode = achievement.getNextCode(),
-                    name = achievement.getName(),
-                    description = achievement.getDescription(),
-                    creditReward = achievement.getCreditReward(),
-                    progressValue = achievement.getProgressValue(),
-                    iconUrl = achievement.getIconUrl(),
+                    code = achievement.code,
+                    nextCode = achievement.nextCode,
+                    name = achievement.name,
+                    description = achievement.description,
+                    creditReward = achievement.creditReward,
+                    progressValue = achievement.progressValue,
+                    iconUrl = achievement.iconUrl,
                     createdAt = ZonedDateTime.now()
                 )
 
                 every { achievementRepository.findById("testCode") } returns java.util.Optional.of(achievement)
                 every { achievementMapper.toResponse(any()) } returns response
-                var achievementResponse = achievementService.getAchievement("testCode")
+
+                val achievementResponse = achievementService.getAchievement("testCode")
+
                 assertNotNull(achievementResponse)
                 assertEquals(response.code, achievementResponse.code)
                 assertEquals(response.nextCode, achievementResponse.nextCode)

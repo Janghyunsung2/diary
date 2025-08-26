@@ -30,7 +30,7 @@ class AiModeServiceImpl(
             mode = request.mode,
             label = request.label,
             description = request.description,
-            imageUrl = imageUrl,
+            imageUrl = imageUrl?:"",
             prompt = request.prompt,
             colorLabel = request.colorLabel,
             colorBg = request.colorBg,
@@ -46,7 +46,7 @@ class AiModeServiceImpl(
         var imageUrl: String = aiMode.getImageUrl()
         if (!request.image.isEmpty) {
             objectStorage.deleteFile(aiMode.getImageUrl())
-            imageUrl = objectStorage.uploadFile(request.image)
+            imageUrl = objectStorage.uploadFile(request.image)!!
         }
         aiMode.update(
             mode = request.mode,

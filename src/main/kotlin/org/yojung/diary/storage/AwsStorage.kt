@@ -19,7 +19,7 @@ class AwsStorage(
 
 ) : ObjectStorage {
 
-    override fun uploadFile(multipartFile: MultipartFile): String {
+    override fun uploadFile(multipartFile: MultipartFile): String? {
         val imageResult = ImageConverter.convertImageToWebpBytes(multipartFile)
 
         // 변환 성공 여부에 따라 확장자와 컨텐츠 타입 결정

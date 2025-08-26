@@ -1,12 +1,15 @@
 package org.yojung.diary.common.security
 
-import io.jsonwebtoken.*
+import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.security.Keys
+import jakarta.annotation.PostConstruct
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Component
 import java.security.Key
 import java.util.*
+import java.util.Base64.getDecoder
 
 @Component
 class JwtTokenProvider {
@@ -14,48 +17,63 @@ class JwtTokenProvider {
     @Value("\${jwt.secret}")
     private lateinit var jwtSecret: String
 
-    @Value("\${jwt.expiration}")
-    private var jwtExpirationMs: Long = 86400000 // 24시간
+    @Value("\${jwt.expiration:86400000}")
+    private var jwtExpirationMs: Long = 86400000
 
-    private val key: Key by lazy {
-        Keys.hmacShaKeyFor(jwtSecret.toByteArray())
+    private lateinit var key: Key
+
+    @PostConstruct
+    fun init() {
+        val raw = jwtSecret.trim()
+        val secretBytes = try {
+            // Base64 로 보이는 경우 디코드 시도
+            if (raw.matches(Regex("^[A-Za-z0-9+/=]+$"))) {
+                val decoded = getDecoder().decode(raw)
+                if (decoded.size >= 64) decoded else raw.toByteArray()
+            } else {
+                raw.toByteArray()
+            }
+        } catch (_: IllegalArgumentException) {
+            raw.toByteArray()
+        }
+
+        require(secretBytes.size >= 64) {
+            "jwt.secret 길이가 부족합니다. HS512 는 최소 64바이트 필요. 현재: ${secretBytes.size}바이트"
+        }
+        key = Keys.hmacShaKeyFor(secretBytes)
     }
 
     fun generateToken(authentication: Authentication): String {
-        val userPrincipal = authentication.principal as CustomUserDetails
-        val expiryDate = Date(Date().time + jwtExpirationMs)
+        val principal = authentication.principal as CustomUserDetails
+        val expiryDate = Date(System.currentTimeMillis() + jwtExpirationMs)
 
         return Jwts.builder()
-            .setSubject(userPrincipal.username)
-            .claim("userId", userPrincipal.getId())
-            .claim("role", userPrincipal.getRole())
-            .claim("isAdmin", userPrincipal.isAdmin())
+            .setSubject(principal.username)
+            .claim("userId", principal.getId())
+            .claim("role", principal.getRole())
+            .claim("isAdmin", principal.isAdmin())
             .setIssuedAt(Date())
             .setExpiration(expiryDate)
             .signWith(key, SignatureAlgorithm.HS512)
             .compact()
     }
 
-    fun getUserEmailFromToken(token: String): String {
-        val claims = Jwts.parser()
+    fun getUserEmailFromToken(token: String): String =
+        Jwts.parser()
             .setSigningKey(key)
             .build()
             .parseClaimsJws(token)
             .body
-        return claims.subject
-    }
+            .subject
 
-    fun validateToken(token: String): Boolean {
+    fun validateToken(token: String): Boolean =
         try {
             Jwts.parser()
                 .setSigningKey(key)
                 .build()
                 .parseClaimsJws(token)
-            return true
-        } catch (ex: JwtException) {
-            return false
-        } catch (ex: IllegalArgumentException) {
-            return false
+            true
+        } catch (_: Exception) {
+            false
         }
-    }
 }
