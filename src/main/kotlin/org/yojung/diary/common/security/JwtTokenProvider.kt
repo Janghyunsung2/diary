@@ -5,7 +5,9 @@ import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.security.Keys
 import jakarta.annotation.PostConstruct
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.core.Authentication
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import java.security.Key
 import java.util.*
@@ -58,6 +60,19 @@ class JwtTokenProvider {
             .compact()
     }
 
+    fun generateRefreshToken(authentication: Authentication): String {
+        val principal = authentication.principal as CustomUserDetails
+        val refreshExpirationMs = jwtExpirationMs * 7 // 리프레시 토큰은 더 긴 만료 시간 설정
+        val expiryDate = Date(System.currentTimeMillis() + refreshExpirationMs)
+
+        return Jwts.builder()
+            .setSubject(principal.username)
+            .setIssuedAt(Date())
+            .setExpiration(expiryDate)
+            .signWith(key, SignatureAlgorithm.HS512)
+            .compact()
+    }
+
     fun getUserEmailFromToken(token: String): String =
         Jwts.parser()
             .setSigningKey(key)
@@ -76,4 +91,8 @@ class JwtTokenProvider {
         } catch (_: Exception) {
             false
         }
+
+    fun getAuthentication(token: String, authenticationManager: AuthenticationManager): Authentication {
+        return SecurityContextHolder.getContext().authentication
+    }
 }
