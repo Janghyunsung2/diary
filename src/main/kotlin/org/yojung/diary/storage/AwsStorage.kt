@@ -2,6 +2,7 @@ package org.yojung.diary.storage
 
 import com.daily.storeage.util.ImageConverter
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import org.yojung.diary.storage.dto.ImageConvertResult
@@ -12,6 +13,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import java.net.URI
 import java.util.UUID
 
+@Profile("blue", "green")
 @Service
 class AwsStorage(
     private val s3Client: S3Client,
