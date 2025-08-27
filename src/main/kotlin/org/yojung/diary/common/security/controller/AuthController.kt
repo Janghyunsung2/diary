@@ -6,6 +6,9 @@ import org.springframework.web.bind.annotation.*
 import org.yojung.diary.common.security.dto.ApiResponse
 import org.yojung.diary.common.security.dto.JwtResponse
 import org.yojung.diary.common.security.dto.LoginRequest
+import org.yojung.diary.common.security.dto.OauthLoginRequest
+import org.yojung.diary.common.security.dto.TokenRequest
+import org.yojung.diary.common.security.dto.TokenResponse
 import org.yojung.diary.common.security.service.AuthService
 
 @RestController
@@ -13,22 +16,23 @@ import org.yojung.diary.common.security.service.AuthService
 class AuthController(
     private val authService: AuthService
 ) {
-
-    @PostMapping("/login")
-    fun authenticateUser(@Valid @RequestBody loginRequest: LoginRequest): ResponseEntity<JwtResponse> {
-        val jwtResponse = authService.authenticateUser(loginRequest)
-        return ResponseEntity.ok(jwtResponse)
+    @PostMapping("/oauth")
+    fun oathLogin(@RequestBody oauthLoginRequest: OauthLoginRequest): ResponseEntity<TokenResponse> {
+        val tokenResponse = authService.oauthLogin(oauthLoginRequest);
+        return ResponseEntity.ok(tokenResponse)
     }
 
-    @PostMapping("/admin/login")
-    fun authenticateAdmin(@Valid @RequestBody loginRequest: LoginRequest): ResponseEntity<JwtResponse> {
-        // 동일한 인증 로직이지만 명시적으로 관리자 로그인 엔드포인트
-        val jwtResponse = authService.authenticateUser(loginRequest)
-        return ResponseEntity.ok(jwtResponse)
+    @GetMapping("/users/me")
+    fun getCurrentUser(): ResponseEntity<ApiResponse> {
+        // Logic to get current authenticated user details
+        return ResponseEntity.ok(ApiResponse(true, "Current user details"))
     }
 
-    @PostMapping("/logout")
-    fun logoutUser(): ResponseEntity<ApiResponse> {
-        return ResponseEntity.ok(ApiResponse(true, "User logged out successfully"))
+    @PostMapping("/refresh")
+    fun refreshToken(@RequestBody tokenRequest: TokenRequest): ResponseEntity<TokenResponse> {
+        // Logic to refresh JWT token
+        val tokenResponse = authService.refreshToken(tokenRequest)
+        return ResponseEntity.ok(tokenResponse)
     }
+
 }
