@@ -10,10 +10,10 @@ import javax.crypto.Cipher
 class AES256EncryptService : EncryptService {
 
     @Value("\${crypto.aes.key}")
-    private val key = ""
+    private val key: String? = null
 
     @Value("\${crypto.aes.iv}")
-    private val iv = ""
+    private val iv: String? = null
 
     private val algorithm = "AES/CBC/PKCS5Padding"
 
@@ -21,8 +21,8 @@ class AES256EncryptService : EncryptService {
 
         try {
             val cipher = Cipher.getInstance(algorithm)
-            val secretKeySpec = javax.crypto.spec.SecretKeySpec(key.toByteArray(), "AES")
-            val ivParameterSpec = javax.crypto.spec.IvParameterSpec(iv.toByteArray())
+            val secretKeySpec = key?.let { javax.crypto.spec.SecretKeySpec(it.toByteArray(), "AES") }
+            val ivParameterSpec = iv?.let { javax.crypto.spec.IvParameterSpec(it.toByteArray()) }
             cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, ivParameterSpec)
             val encrypted = cipher.doFinal(value.toByteArray())
             return Base64.getEncoder().encodeToString(encrypted);
@@ -33,8 +33,8 @@ class AES256EncryptService : EncryptService {
     override fun decrypt(value: String): String {
         try {
             val cipher = Cipher.getInstance(algorithm)
-            val secretKeySpec = javax.crypto.spec.SecretKeySpec(key.toByteArray(), "AES")
-            val ivParameterSpec = javax.crypto.spec.IvParameterSpec(iv.toByteArray())
+            val secretKeySpec = key?.let { javax.crypto.spec.SecretKeySpec(it.toByteArray(), "AES") }
+            val ivParameterSpec = iv?.let { javax.crypto.spec.IvParameterSpec(it.toByteArray()) }
             cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, ivParameterSpec)
             val decodedValue = Base64.getDecoder().decode(value)
             val decrypted = cipher.doFinal(decodedValue)

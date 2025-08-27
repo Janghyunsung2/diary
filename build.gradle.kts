@@ -20,6 +20,8 @@ java {
 
 repositories {
     mavenCentral()
+    maven { url = uri("https://repo.spring.io/milestone") }
+    maven { url = uri("https://repo.spring.io/snapshot") }
 }
 
 dependencies {
@@ -30,6 +32,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.thymeleaf.extras:thymeleaf-extras-springsecurity6")
@@ -44,6 +47,7 @@ dependencies {
     implementation("io.jsonwebtoken:jjwt-api:0.12.3")
     implementation("io.jsonwebtoken:jjwt-impl:0.12.3")
     implementation("io.jsonwebtoken:jjwt-jackson:0.12.3")
+    implementation("org.springframework.ai:spring-ai-openai-spring-boot-starter:1.0.0-M3")
 
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     runtimeOnly("com.mysql:mysql-connector-j")
