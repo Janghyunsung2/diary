@@ -8,16 +8,21 @@ import org.yojung.diary.aimode.exception.AiModeNotFoundException
 import org.yojung.diary.aimode.repository.AiModeRepository
 import org.yojung.diary.common.converter.EncryptConverter
 import org.yojung.diary.credittransaction.service.CreditTransactionService
+import org.yojung.diary.diary.ai.service.AiService
 import org.yojung.diary.diary.domain.Diary
 import org.yojung.diary.diary.dto.*
 import org.yojung.diary.diary.exception.DiaryNotFoundException
 import org.yojung.diary.diary.mapper.DiaryMapper
 import org.yojung.diary.diary.repository.DiaryRepository
 import org.yojung.diary.diary.service.DiaryService
+import org.yojung.diary.feedback.domain.Feedback
+import org.yojung.diary.feedback.dto.FeedbackRequest
 import org.yojung.diary.feedback.exception.FeedbackNotFoundException
 import org.yojung.diary.feedback.mapper.FeedbackMapper
 import org.yojung.diary.feedback.repository.FeedbackRepository
 import org.yojung.diary.logger.DiscordLogger
+import org.yojung.diary.user.exception.UserNotFoundException
+import org.yojung.diary.user.repository.UserRepository
 import java.time.LocalDate
 
 @Service
@@ -26,17 +31,24 @@ class DiaryServiceImpl(
     private val dailyRepository: DiaryRepository,
     private val aiModeRepository: AiModeRepository,
     private val feedbackRepository: FeedbackRepository,
+
+    private val aiService: AiService,
     private val creditTransactionService: CreditTransactionService,
     private val feedbackMapper: FeedbackMapper,
     private val encryptConverter: EncryptConverter,
     private val discordLogger: DiscordLogger,
     private val diaryMapper: DiaryMapper,
+
+    private val userRepository: UserRepository,
     // TODO: 레빗MQ 관련 의존성(feedbackConsumer, achievementConsumer) 제거 예정
 ) : DiaryService {
     @Transactional
     override fun createDaily(userId: Long, dailyRegisterRequest: DiaryRegisterRequest): DiaryResponse {
         val encryptedContent = encryptConverter.convertToDatabaseColumn(dailyRegisterRequest.content)
-        var diary = diaryMapper.toEntity(dailyRegisterRequest);
+        val dailyRegisterRequest = dailyRegisterRequest.copy(content = encryptedContent)
+        val user = userRepository.findById(userId).orElseThrow({ UserNotFoundException(userId) })
+        var diary = diaryMapper.toEntity(dailyRegisterRequest, user);
+
         val saved = dailyRepository.save(diary)
         val aiMode = aiModeRepository.findById(dailyRegisterRequest.aiModeId)
             .orElseThrow { AiModeNotFoundException(dailyRegisterRequest.aiModeId) }
@@ -45,7 +57,20 @@ class DiaryServiceImpl(
             throw FeedbackNotFoundException("Insufficient credit to use AI mode")
         }
         val isUseCredit = aiMode.getCreditAmount() > 0
-        // TODO: feedbackConsumer.sendFeedback, achievementConsumer.sendAchievement 레빗MQ 제거 예정
+
+        val feedbackResponse = aiService.getFeedback(FeedbackRequest(
+            content = dailyRegisterRequest.content,
+            nickname = dailyRegisterRequest.nickname,
+            prompt = aiMode.getPrompt(),
+            isUseCredit = isUseCredit,
+        ))
+
+        val feedback = Feedback(
+            diary = saved,
+            content = feedbackResponse.content,
+            mode = aiMode.getMode(),
+        )
+        feedbackRepository.save(feedback)
         discordLogger.info("일기 작성 로그: userId=$userId, nickname=${dailyRegisterRequest.nickname}")
         return diaryMapper.toResponse(saved)
     }
@@ -92,13 +117,12 @@ class DiaryServiceImpl(
     override fun getDailyAndFeedback(userId: Long, dailyId: Long): DiaryAndFeedbackResponse {
         val daily = findDailyById(dailyId)
         var dailyResponse = diaryMapper.toResponse(daily)
-        var user = daily.getUser();
-        if (userId == userId) {
-            dailyResponse = dailyResponse.copy(content = encryptConverter.convertToEntityAttribute(dailyResponse.content))
-        }
+
+
+        dailyResponse = dailyResponse.copy(content = encryptConverter.convertToEntityAttribute(dailyResponse.content))
+
         val feedback = feedbackRepository.findByDiaryId(dailyId);
         val feedbackResponse = feedbackMapper.toResponse(feedback)
-        val aiMode = aiModeRepository.findByMode(feedbackResponse.mode).orElse(null)
 
         return DiaryAndFeedbackResponse(dailyResponse, feedbackResponse)
     }
