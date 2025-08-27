@@ -3,6 +3,7 @@ package org.yojung.diary.storage
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
 
+@Profile("local")
 @Service
 class LocalStorage : ObjectStorage {
     override fun uploadFile(multipartFile: org.springframework.web.multipart.MultipartFile): String? {
