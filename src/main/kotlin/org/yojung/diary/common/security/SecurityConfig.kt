@@ -77,7 +77,7 @@ class SecurityConfig(
             .cors { }                                   // ✅ CORS 켜기
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests {
-                it.requestMatchers("/api/auth", "/api/auth/**", "/api/public/**").permitAll()  // ✅ 제일 위
+                it.requestMatchers("/api/auth/refresh", "/api/auth/oauth", "/api/public/**").permitAll()  // ✅ 제일 위
                     .requestMatchers("/api/admin/**").hasRole("ADMIN")
                     .requestMatchers("/api/**").hasAnyRole("USER","ADMIN")
                     .anyRequest().authenticated()

@@ -21,7 +21,8 @@ class JwtAuthenticationFilter(
     override fun shouldNotFilter(request: HttpServletRequest): Boolean {
         val p = request.servletPath ?: request.requestURI
         return request.method.equals("OPTIONS", true) ||
-                matcher.match("/api/auth/**", p) ||
+                matcher.match("/api/auth/oauth", p) ||
+                matcher.match("/api/auth/refresh", p) ||
                 matcher.match("/api/public/**", p)
     }
 
