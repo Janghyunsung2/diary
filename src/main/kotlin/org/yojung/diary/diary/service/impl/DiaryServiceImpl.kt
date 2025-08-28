@@ -47,7 +47,13 @@ class DiaryServiceImpl(
         val encryptedContent = encryptConverter.convertToDatabaseColumn(dailyRegisterRequest.content)
         val dailyRegisterRequest = dailyRegisterRequest.copy(content = encryptedContent)
         val user = userRepository.findById(userId).orElseThrow({ UserNotFoundException(userId) })
-        var diary = diaryMapper.toEntity(dailyRegisterRequest, user);
+
+        val diary = Diary(
+            content = dailyRegisterRequest.content,
+            emotionType = dailyRegisterRequest.emotionType,
+            visibility = dailyRegisterRequest.visibility,
+            user = user,
+        )
 
         val saved = dailyRepository.save(diary)
         val aiMode = aiModeRepository.findById(dailyRegisterRequest.aiModeId)

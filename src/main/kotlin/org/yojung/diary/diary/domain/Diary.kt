@@ -47,14 +47,11 @@ class Diary {
     constructor(
         content: String,
         emotionType: String,
-        user: User? = null,
-        visibility: Boolean = true
-    ) {
+        visibility: Boolean,
+        user: User?,
+    ){
         this.content = content
         this.emotionType = emotionType
-        if (user != null) {
-            this.user = user
-        };
         this.visibility = visibility
     }
     constructor() {
@@ -98,6 +95,9 @@ class Diary {
         return visibility
     }
 
+    fun setUser(user: User) {
+        this.user = user
+    }
     fun getUser(): User? {
         return user
     }

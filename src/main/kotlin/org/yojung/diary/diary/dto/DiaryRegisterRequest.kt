@@ -10,7 +10,6 @@ data class DiaryRegisterRequest(
     val content: String,
     @field:NotBlank
     val emotionType: String,
-    @field:NotNull
     val visibility: Boolean = true,
     val aiModeId : Int = 0,
     val isUseCredit : Boolean = false,

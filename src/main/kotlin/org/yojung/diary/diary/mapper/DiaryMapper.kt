@@ -10,7 +10,10 @@ import org.yojung.diary.user.repository.UserRepository
 
 @Mapper(componentModel = "spring")
 interface DiaryMapper {
+
+    @Mapping(target = "user", source = "user")
     fun toEntity(request: DiaryRegisterRequest, user: User): Diary
+
     @Mapping(target= "userId", source = "user.id")
     fun toResponse(entity: Diary): DiaryResponse
 }
