@@ -35,11 +35,11 @@ class UserServiceImpl(
         )
         val saved = userRepository.save(user)
         return UserResponse(
-            id = saved.getId(),
-            oauthId = saved.getOauthId(),
+            userId = saved.getId(),
+            providerId = saved.getOauthId(),
             provider = saved.getProvider(),
-            nickname = saved.getNickname(),
-            profileImage = saved.getProfileImage(),
+            nickName = saved.getNickname(),
+            profileImageUrl = saved.getProfileImage(),
             gender = saved.getGender()
         )
     }
@@ -48,11 +48,11 @@ class UserServiceImpl(
     override fun getUser(id: Long): UserResponse {
         val user = userRepository.findById(id).orElseThrow { UserNotFoundException(id) }
         return UserResponse(
-            id = user.getId(),
-            oauthId = user.getOauthId(),
+            userId = user.getId(),
+            providerId = user.getOauthId(),
             provider = user.getProvider(),
-            nickname = user.getNickname(),
-            profileImage = user.getProfileImage(),
+            nickName = user.getNickname(),
+            profileImageUrl = user.getProfileImage(),
             gender = user.getGender(),
         )
     }
@@ -63,17 +63,23 @@ class UserServiceImpl(
         if (request.nickname.isBlank() || request.nickname.length > 20) {
             throw UserBadRequestException("닉네임은 비어있거나 20자 이상일 수 없습니다.")
         }
+        var updateImage: String? = null
+        if(request.profileImage != null) {
+            objectStorage.deleteFile(user.getProfileImage())
+            updateImage = objectStorage.uploadFile(request.profileImage)
+        }
+
         user.update(
             nickname = request.nickname,
             gender = request.gender,
-            profileImage = request.profileImage
+            profileImage = updateImage
         )
         return UserResponse(
-            id = user.getId(),
-            oauthId = user.getOauthId(),
+            userId = user.getId(),
+            providerId = user.getOauthId(),
             provider = user.getProvider(),
-            nickname = user.getNickname(),
-            profileImage = user.getProfileImage(),
+            nickName = user.getNickname(),
+            profileImageUrl = user.getProfileImage(),
             gender = user.getGender(),
         )
     }

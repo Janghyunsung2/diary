@@ -66,13 +66,17 @@ class User {
     }
 
     fun update(
-        nickname: String,
-        profileImage: String,
+        nickname: String?,
+        profileImage: String?,
         gender: Gender?= Gender.UNKNOWN
     )
     {
-        this.nickname = nickname
-        this.profileImage = profileImage
+        if (nickname != null) {
+            this.nickname = nickname
+        }
+        if (profileImage != null) {
+            this.profileImage = profileImage
+        }
         if (gender != null) {
             this.gender = gender
         }
