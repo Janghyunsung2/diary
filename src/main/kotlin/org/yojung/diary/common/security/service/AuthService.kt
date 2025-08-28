@@ -33,11 +33,13 @@ class AuthService(
     }
 
     fun refreshToken(tokenRequest: TokenRequest): TokenResponse? {
-        if (jwtTokenProvider.validateToken(tokenRequest.refreshToken)) {
-            val authentication: Authentication = jwtTokenProvider.getAuthentication(tokenRequest.refreshToken, authenticationManager)
-            val accessToken = jwtTokenProvider.generateToken(authentication)
-            val refreshToken = jwtTokenProvider.generateRefreshToken(authentication)
-            return TokenResponse(accessToken, refreshToken)
+        tokenRequest.refreshToken?.let {
+            if (jwtTokenProvider.validateToken(it)) {
+                val authentication: Authentication = jwtTokenProvider.getAuthentication(tokenRequest.refreshToken, authenticationManager)
+                val accessToken = jwtTokenProvider.generateToken(authentication)
+                val refreshToken = jwtTokenProvider.generateRefreshToken(authentication)
+                return TokenResponse(accessToken, refreshToken)
+            }
         }
         return null
     }
