@@ -53,6 +53,7 @@ class Diary {
         this.content = content
         this.emotionType = emotionType
         this.visibility = visibility
+        this.user = user
     }
     constructor() {
         // Default constructor for JPA
