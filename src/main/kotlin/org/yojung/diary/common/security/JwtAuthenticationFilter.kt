@@ -31,7 +31,8 @@ class JwtAuthenticationFilter(
             val token = req.getHeader("Authorization")?.takeIf { it.startsWith("Bearer ") }?.substring(7)
             if (!token.isNullOrBlank() && jwtTokenProvider.validateToken(token)) {
                 val providerId = jwtTokenProvider.getProviderIdFromToken(token)
-                val user = customUserDetailsService.loadUserByUsername(providerId)
+                val provider = jwtTokenProvider.getProviderFromToken(token)
+                val user = customUserDetailsService.loadByProviderAndProviderId(provider, providerId)
                 val auth = UsernamePasswordAuthenticationToken(user, null, user.authorities)
                 auth.details = WebAuthenticationDetailsSource().buildDetails(req)
                 SecurityContextHolder.getContext().authentication = auth
