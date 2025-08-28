@@ -30,7 +30,7 @@ class CustomUserDetailsService(
 
 
     fun loadByProviderAndProviderId(provider: String, providerId: String): CustomUserDetails {
-        val user = userRepository.findByOauthIdAndProvider(providerId, provider).orElseThrow({ UserNotFoundException("$providerId not found") })
+        val user = userRepository.findFirstByOauthIdAndProviderAndIsActiveTrueOrderByIdDesc(providerId, provider).orElseThrow({ UserNotFoundException("$providerId not found") })
 
         return CustomUserDetails(
             id = user.getId(),

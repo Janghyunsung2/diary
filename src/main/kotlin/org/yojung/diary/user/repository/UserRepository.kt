@@ -5,7 +5,9 @@ import org.yojung.diary.user.domain.User
 import java.util.Optional
 
 interface UserRepository : JpaRepository<User, Long> {
-    fun findByOauthIdAndProvider(oauthId: String, provider: String): Optional<User>
+
+
+    fun findFirstByOauthIdAndProviderAndIsActiveTrueOrderByIdDesc(oauthId: String, provider: String): Optional<User>
     fun existsByNickname(nickname: String): Boolean
     fun findByOauthId(oauthId: String): Optional<User>
 }
