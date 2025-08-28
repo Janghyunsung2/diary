@@ -24,7 +24,8 @@ class JwtAuthenticationFilter(
 
         if (token != null && jwtTokenProvider.validateToken(token)) {
             val providerId = jwtTokenProvider.getProviderIdFromToken(token)
-            val userDetails = customUserDetailsService.loadByProviderAndProviderId("", providerId)
+            val provider = jwtTokenProvider.getProviderFromToken(token)
+            val userDetails = customUserDetailsService.loadByProviderAndProviderId(provider, providerId)
 
             val authentication = UsernamePasswordAuthenticationToken(
                 userDetails, null, userDetails.authorities

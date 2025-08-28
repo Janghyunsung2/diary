@@ -77,6 +77,12 @@ class JwtTokenProvider(
         Jwts.parser().setSigningKey(key).build()
             .parseClaimsJws(token).body.subject
 
+    fun getProviderFromToken(token: String): String {
+        val claims = Jwts.parser().setSigningKey(key).build()
+            .parseClaimsJws(token).body
+        return claims["provider"]?.toString() ?: error("provider claim 없음")
+    }
+
     fun getClaims(token: String) =
         Jwts.parser().setSigningKey(key).build()
             .parseClaimsJws(token).body
