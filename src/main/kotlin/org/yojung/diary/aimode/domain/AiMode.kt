@@ -27,7 +27,7 @@ class AiMode {
     @Column(name = "image_url", nullable = false)
     private var imageUrl : String
 
-    @Column(name = "prompt", nullable = false)
+    @Column(name = "prompt", nullable = false, length = 2000)
     private var prompt : String
 
     @Column(name = "color_label", nullable = true)

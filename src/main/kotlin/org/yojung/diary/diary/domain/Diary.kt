@@ -16,7 +16,6 @@ import java.time.ZonedDateTime
 
 @Entity
 @Table(name = "dailies")
-//open으로 선한한 이유는 Hibernate는 런타임에 Diary$HibernateProxy같은 객체를 생성해서 관리합니다.
 class Diary {
 
     @Id
@@ -24,7 +23,7 @@ class Diary {
     @Column(name = "daily_id")
     private var id: Long? = null
 
-    @Column(name = "content", nullable = false)
+    @Column(name = "content", nullable = false, length = 2000)
     private var content: String = ""
 
     @Column(name = "emotion_type", nullable = false)
