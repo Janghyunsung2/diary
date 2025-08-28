@@ -5,7 +5,7 @@ import org.springframework.web.multipart.MultipartFile
 interface ObjectStorage {
 
 
-    fun uploadFile(multipartFile: MultipartFile): String?
+    fun uploadFile(multipartFile: MultipartFile?): String?
 
-    fun deleteFile(fileUrl: String): Boolean
+    fun deleteFile(fileUrl: String?): Boolean
 }

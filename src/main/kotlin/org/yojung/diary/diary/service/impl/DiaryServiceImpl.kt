@@ -24,6 +24,7 @@ import org.yojung.diary.logger.DiscordLogger
 import org.yojung.diary.user.exception.UserNotFoundException
 import org.yojung.diary.user.repository.UserRepository
 import java.time.LocalDate
+import java.time.ZonedDateTime
 
 @Service
 @Transactional
@@ -40,7 +41,6 @@ class DiaryServiceImpl(
     private val diaryMapper: DiaryMapper,
 
     private val userRepository: UserRepository,
-    // TODO: 레빗MQ 관련 의존성(feedbackConsumer, achievementConsumer) 제거 예정
 ) : DiaryService {
     @Transactional
     override fun createDaily(userId: Long, dailyRegisterRequest: DiaryRegisterRequest): DiaryResponse {
@@ -134,7 +134,7 @@ class DiaryServiceImpl(
 
     @Transactional(readOnly = true)
     override fun canWriteDaily(userId: Long): Boolean {
-        return !dailyRepository.existsByUserIdAndCreatedAt(userId, LocalDate.now())
+        return !dailyRepository.existsByUserIdAndCreatedAt(userId, ZonedDateTime.now())
     }
 
     private fun findDailyById(dailyId: Long): Diary {

@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param
 import org.yojung.diary.diary.domain.Diary
 import org.yojung.diary.diary.dto.DiaryResponse
 import java.time.LocalDate
+import java.time.ZonedDateTime
 
 interface DiaryRepository : JpaRepository<Diary, Long> {
     @Query("""
@@ -35,5 +36,5 @@ interface DiaryRepository : JpaRepository<Diary, Long> {
         @Param("month") month: Int
     ): List<DiaryResponse>
 
-    fun existsByUserIdAndCreatedAt(userId: Long, createdAt: LocalDate): Boolean
+    fun existsByUserIdAndCreatedAt(userId: Long, createdAt: ZonedDateTime): Boolean
 }
