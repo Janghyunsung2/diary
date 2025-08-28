@@ -21,12 +21,12 @@ class AwsStorage(
 
 ) : ObjectStorage {
 
-    override fun uploadFile(multipartFile: MultipartFile): String? {
+    override fun uploadFile(multipartFile: MultipartFile?): String? {
         val imageResult = ImageConverter.convertImageToWebpBytes(multipartFile)
 
         // 변환 성공 여부에 따라 확장자와 컨텐츠 타입 결정
-        val extension = if (imageResult.converted) "webp" else imageResult.extension
-        val contentType = if (imageResult.converted) "image/webp" else getContentType(imageResult.extension)
+        val extension = imageResult?.let { if (it.converted) "webp" else imageResult.extension }
+        val contentType = imageResult?.let { if (it.converted) "image/webp" else getContentType(imageResult.extension) }
 
         val key = "uploads/${UUID.randomUUID()}.$extension"
 
@@ -36,10 +36,12 @@ class AwsStorage(
             .contentType(contentType)
             .build()
 
-        s3Client.putObject(
-            putReq,
-            RequestBody.fromBytes(imageResult.bytes)
-        )
+        imageResult?.let {
+            s3Client.putObject(
+                putReq,
+                RequestBody.fromBytes(it.bytes)
+            )
+        }
 
         val url = s3Client.utilities().getUrl { it.bucket(bucketName).key(key) }
         return url.toExternalForm()
@@ -56,7 +58,7 @@ class AwsStorage(
         }
     }
 
-    override fun deleteFile(fileUrl: String): Boolean {
+    override fun deleteFile(fileUrl: String?): Boolean {
         return try {
             val key = URI(fileUrl).path.removePrefix("/")
             val delReq = DeleteObjectRequest.builder()

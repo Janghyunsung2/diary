@@ -8,9 +8,9 @@ import java.io.IOException
 
 object ImageConverter {
     @JvmStatic
-    fun convertImageToWebpBytes(file: MultipartFile): ImageConvertResult {
+    fun convertImageToWebpBytes(file: MultipartFile?): ImageConvertResult? {
         try {
-            val originalBytes = file.getBytes()
+            val originalBytes = file?.bytes
             val image = ImmutableImage.loader().fromBytes(originalBytes)
 
             val webpWriter = WebpWriter(6, 80, 6, false)
@@ -20,9 +20,9 @@ object ImageConverter {
             return ImageConvertResult(true, bytes, "webp")
         } catch (e: Exception) {
             try {
-                val originalBytes = file.getBytes()
-                val ext = getExtension(file.getOriginalFilename())
-                return ImageConvertResult(false, originalBytes, ext)
+                val originalBytes = file?.bytes
+                val ext = getExtension(file?.originalFilename)
+                return originalBytes?.let { ImageConvertResult(false, it, ext) }
             } catch (ex: IOException) {
                 throw RuntimeException(ex)
             }
