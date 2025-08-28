@@ -1,20 +1,22 @@
 package org.yojung.diary.common.security.controller
 
-import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
-import org.yojung.diary.common.security.dto.ApiResponse
-import org.yojung.diary.common.security.dto.JwtResponse
-import org.yojung.diary.common.security.dto.LoginRequest
+import org.yojung.diary.common.security.CustomUserDetails
+
 import org.yojung.diary.common.security.dto.OauthLoginRequest
 import org.yojung.diary.common.security.dto.TokenRequest
 import org.yojung.diary.common.security.dto.TokenResponse
 import org.yojung.diary.common.security.service.AuthService
+import org.yojung.diary.user.dto.UserResponse
+import org.yojung.diary.user.service.UserService
 
 @RestController
 @RequestMapping("/api/auth")
 class AuthController(
-    private val authService: AuthService
+    private val authService: AuthService,
+    private val userService: UserService
 ) {
     @PostMapping("/oauth")
     fun oathLogin(@RequestBody oauthLoginRequest: OauthLoginRequest): ResponseEntity<TokenResponse> {
@@ -23,9 +25,11 @@ class AuthController(
     }
 
     @GetMapping("/users/me")
-    fun getCurrentUser(): ResponseEntity<ApiResponse> {
-        // Logic to get current authenticated user details
-        return ResponseEntity.ok(ApiResponse(true, "Current user details"))
+    fun getCurrentUser(): ResponseEntity<UserResponse> {
+        val user = SecurityContextHolder.getContext().authentication.principal as CustomUserDetails
+        val userResponse = userService.getUser(user.getId());
+
+        return ResponseEntity.ok(userResponse)
     }
 
     @PostMapping("/refresh")

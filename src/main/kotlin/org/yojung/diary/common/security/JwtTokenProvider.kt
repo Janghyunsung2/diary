@@ -5,16 +5,17 @@ import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.security.Keys
 import jakarta.annotation.PostConstruct
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.security.authentication.AuthenticationManager
-import org.springframework.security.core.Authentication
-import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import java.security.Key
 import java.util.*
 import java.util.Base64.getDecoder
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.Authentication
 
 @Component
-class JwtTokenProvider {
+class JwtTokenProvider(
+    private val userDetailsService: CustomUserDetailsService // ⬅ provider+providerId로 찾는 메서드 필요
+) {
 
     @Value("\${jwt.secret}")
     private lateinit var jwtSecret: String
@@ -28,13 +29,10 @@ class JwtTokenProvider {
     fun init() {
         val raw = jwtSecret.trim()
         val secretBytes = try {
-            // Base64 로 보이는 경우 디코드 시도
             if (raw.matches(Regex("^[A-Za-z0-9+/=]+$"))) {
                 val decoded = getDecoder().decode(raw)
                 if (decoded.size >= 64) decoded else raw.toByteArray()
-            } else {
-                raw.toByteArray()
-            }
+            } else raw.toByteArray()
         } catch (_: IllegalArgumentException) {
             raw.toByteArray()
         }
@@ -50,10 +48,12 @@ class JwtTokenProvider {
         val expiryDate = Date(System.currentTimeMillis() + jwtExpirationMs)
 
         return Jwts.builder()
-            .setSubject(principal.username)
-            .claim("userId", principal.getId())
+            .setSubject(principal.getEmail())   // ✅ providerId를 subject로
+            .claim("id", principal.getId())
+            .claim("providerId", principal.getEmail())
             .claim("role", principal.getRole())
             .claim("isAdmin", principal.isAdmin())
+            .claim("provider", principal.getProvider()) // provider 정보도 클레임에 추가
             .setIssuedAt(Date())
             .setExpiration(expiryDate)
             .signWith(key, SignatureAlgorithm.HS512)
@@ -62,37 +62,37 @@ class JwtTokenProvider {
 
     fun generateRefreshToken(authentication: Authentication): String {
         val principal = authentication.principal as CustomUserDetails
-        val refreshExpirationMs = jwtExpirationMs * 7 // 리프레시 토큰은 더 긴 만료 시간 설정
+        val refreshExpirationMs = jwtExpirationMs * 7
         val expiryDate = Date(System.currentTimeMillis() + refreshExpirationMs)
 
         return Jwts.builder()
-            .setSubject(principal.username)
+            .setSubject(principal.getEmail())
             .setIssuedAt(Date())
             .setExpiration(expiryDate)
             .signWith(key, SignatureAlgorithm.HS512)
             .compact()
     }
 
-    fun getUserEmailFromToken(token: String): String =
-        Jwts.parser()
-            .setSigningKey(key)
-            .build()
-            .parseClaimsJws(token)
-            .body
-            .subject
+    fun getProviderIdFromToken(token: String): String =
+        Jwts.parser().setSigningKey(key).build()
+            .parseClaimsJws(token).body.subject
+
+    fun getClaims(token: String) =
+        Jwts.parser().setSigningKey(key).build()
+            .parseClaimsJws(token).body
 
     fun validateToken(token: String): Boolean =
         try {
-            Jwts.parser()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token)
+            Jwts.parser().setSigningKey(key).build().parseClaimsJws(token)
             true
-        } catch (_: Exception) {
-            false
-        }
+        } catch (_: Exception) { false }
 
-    fun getAuthentication(token: String, authenticationManager: AuthenticationManager): Authentication {
-        return SecurityContextHolder.getContext().authentication
+
+    fun getAuthentication(token: String): Authentication {
+        val claims = getClaims(token)
+        val provider = claims["provider"]?.toString() ?: error("provider claim 없음")
+        val providerId = claims.subject
+        val userDetails = userDetailsService.loadByProviderAndProviderId(provider, providerId)
+        return UsernamePasswordAuthenticationToken(userDetails, null, userDetails.authorities)
     }
 }

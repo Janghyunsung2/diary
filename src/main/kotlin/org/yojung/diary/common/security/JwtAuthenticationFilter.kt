@@ -8,6 +8,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
+import org.yojung.diary.common.security.context.UserContext
 
 @Component
 class JwtAuthenticationFilter(
@@ -23,14 +24,15 @@ class JwtAuthenticationFilter(
         val token = getTokenFromRequest(request)
 
         if (token != null && jwtTokenProvider.validateToken(token)) {
-            val email = jwtTokenProvider.getUserEmailFromToken(token)
-            val userDetails = customUserDetailsService.loadUserByUsername(email)
+            val providerId = jwtTokenProvider.getProviderIdFromToken(token)
+            val userDetails = customUserDetailsService.loadByProviderAndProviderId("", providerId)
 
             val authentication = UsernamePasswordAuthenticationToken(
                 userDetails, null, userDetails.authorities
             )
             authentication.details = WebAuthenticationDetailsSource().buildDetails(request)
             SecurityContextHolder.getContext().authentication = authentication
+
         }
 
         filterChain.doFilter(request, response)

@@ -1,6 +1,5 @@
 package org.yojung.diary.common.security.service
 
-import ch.qos.logback.classic.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -13,10 +12,11 @@ import org.yojung.diary.common.security.dto.OauthLoginRequest
 import org.yojung.diary.common.security.dto.TokenRequest
 import org.yojung.diary.common.security.dto.TokenResponse
 
+
 @Service
 class AuthService(
     private val authenticationManager: AuthenticationManager,
-    private val jwtTokenProvider: JwtTokenProvider
+    private val jwtTokenProvider: JwtTokenProvider,
 ) {
 
     var logger: org.slf4j.Logger = LoggerFactory.getLogger(AuthService::class.java)
@@ -38,7 +38,7 @@ class AuthService(
     fun refreshToken(tokenRequest: TokenRequest): TokenResponse? {
         tokenRequest.refreshToken?.let {
             if (jwtTokenProvider.validateToken(it)) {
-                val authentication: Authentication = jwtTokenProvider.getAuthentication(tokenRequest.refreshToken, authenticationManager)
+                val authentication: Authentication = jwtTokenProvider.getAuthentication(tokenRequest.refreshToken)
                 val accessToken = jwtTokenProvider.generateToken(authentication)
                 val refreshToken = jwtTokenProvider.generateRefreshToken(authentication)
                 return TokenResponse(accessToken, refreshToken)
@@ -46,4 +46,6 @@ class AuthService(
         }
         return null
     }
+
+
 }

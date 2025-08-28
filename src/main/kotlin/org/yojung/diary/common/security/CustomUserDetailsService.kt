@@ -5,6 +5,7 @@ import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.stereotype.Service
 import org.yojung.diary.admin.repository.AdminRepository
+import org.yojung.diary.user.exception.UserNotFoundException
 import org.yojung.diary.user.repository.UserRepository
 
 @Service
@@ -13,33 +14,31 @@ class CustomUserDetailsService(
     private val adminRepository: AdminRepository
 ) : UserDetailsService {
 
+
     override fun loadUserByUsername(email: String): UserDetails {
-        // 먼저 관리자 확인
         val admin = adminRepository.findByEmail(email)
-        if (admin.isPresent) {
-            val adminEntity = admin.get()
-            return CustomUserDetails(
-                id = adminEntity.id?.toLong() ?: 0L,
-                email = adminEntity.email,
-                password = adminEntity.password,
-                role = "ADMIN",
-                isAdmin = true
-            )
-        }
+            .orElseThrow { UsernameNotFoundException("Admin not found with email: $email") }
 
-        // 관리자가 아니면 일반 사용자 확인
-        val user = userRepository.findByOauthId(email)
-        if (user.isPresent) {
-            val userEntity = user.get()
-            return CustomUserDetails(
-                id = userEntity.getId(),
-                email = userEntity.getOauthId(),
-                password = userEntity.getPassword() ?: "",
-                role = "USER",
-                isAdmin = false
-            )
-        }
+        return CustomUserDetails(
+            id = admin.id?.toLong() ?: 0L,
+            email = admin.email,
+            password = admin.password, // 세션 기반 로그인 → password 필요
+            role = "ADMIN",
+            isAdmin = true
+        )
+    }
 
-        throw UsernameNotFoundException("User not found with email: $email")
+
+    fun loadByProviderAndProviderId(provider: String, providerId: String): CustomUserDetails {
+        val user = userRepository.findByOauthIdAndProvider(providerId, provider).orElseThrow({ UserNotFoundException("$providerId not found") })
+
+        return CustomUserDetails(
+            id = user.getId(),
+            email = user.getOauthId(),          // 소셜 로그인 계정의 식별자 (oauthId)
+            password = user.getPassword() ?: "", // 비밀번호 없을 수도 있음
+            role = "USER",
+            isAdmin = false,
+            provider = user.getProvider(),
+        )
     }
 }

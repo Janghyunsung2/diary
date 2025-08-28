@@ -9,7 +9,8 @@ data class CustomUserDetails(
     private val email: String,
     private val password: String,
     private val role: String,
-    private val isAdmin: Boolean = false
+    private val isAdmin: Boolean = false,
+    private val provider: String = "",
 ) : UserDetails {
 
     override fun getAuthorities(): Collection<GrantedAuthority> {
@@ -28,6 +29,8 @@ data class CustomUserDetails(
     override fun isEnabled(): Boolean = true
 
     fun getId(): Long = id
+    fun getEmail(): String = email
     fun getRole(): String = role
     fun isAdmin(): Boolean = isAdmin
+    fun getProvider(): String = provider
 }
