@@ -12,6 +12,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+import org.springframework.web.cors.CorsConfiguration
+import org.springframework.web.cors.CorsConfigurationSource
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 
 @Configuration
 @EnableWebSecurity
@@ -65,34 +68,36 @@ class SecurityConfig(
         return http.build()
     }
 
-    /**
-     * 2. API용 SecurityFilterChain (JWT 기반)
-     */
     @Bean
     @Order(2)
     fun apiSecurityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http
             .securityMatcher("/api/**")
             .csrf { it.disable() }
-            .sessionManagement { session ->
-                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            }
-            .authorizeHttpRequests { auth ->
-                auth
-                    .requestMatchers("/api/auth/**", "/api/public/**").permitAll()
+            .cors { }                                   // ✅ CORS 켜기
+            .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
+            .authorizeHttpRequests {
+                it.requestMatchers("/api/auth", "/api/auth/**", "/api/public/**").permitAll()  // ✅ 제일 위
                     .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                    .requestMatchers("/api/**").hasAnyRole("USER", "ADMIN")
+                    .requestMatchers("/api/**").hasAnyRole("USER","ADMIN")
                     .anyRequest().authenticated()
             }
-            .exceptionHandling { exception ->
-                exception.authenticationEntryPoint(jwtAuthenticationEntryPoint)
-            }
+            .exceptionHandling { it.authenticationEntryPoint(jwtAuthenticationEntryPoint) }
             .formLogin { it.disable() }
             .logout { it.disable() }
 
-        // JWT 필터 추가 (API 요청만)
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
-
         return http.build()
+    }
+
+    @Bean
+    fun corsConfigurationSource(): CorsConfigurationSource {
+        val c = CorsConfiguration().apply {
+            allowedOriginPatterns = listOf("*")
+            allowedMethods = listOf("GET","POST","PUT","PATCH","DELETE","OPTIONS")
+            allowedHeaders = listOf("*")
+            allowCredentials = true
+        }
+        return UrlBasedCorsConfigurationSource().apply { registerCorsConfiguration("/**", c) }
     }
 }
