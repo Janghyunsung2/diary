@@ -20,7 +20,7 @@ class Feedback {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JoinColumn(name = "feedback_id")
+    @Column(name = "feedback_id")
     var id: Long? = null
 
     @Column(name = "content", nullable = false)
