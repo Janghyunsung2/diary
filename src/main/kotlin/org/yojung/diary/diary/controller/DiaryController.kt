@@ -54,6 +54,15 @@ class DiaryController (private val diaryService: DiaryService) {
         return ResponseEntity.ok(response)
     }
 
+    @GetMapping("/{dailyId}")
+    fun getDiary(
+        @AuthenticationPrincipal user: CustomUserDetails,
+        @PathVariable dailyId: Long
+    ) : ResponseEntity<Any> {
+        val response = diaryService.getDailyAndFeedback(user.getId(),dailyId)
+        return ResponseEntity.ok(response)
+    }
+
     @GetMapping("/month")
     fun getDiariesByMonth(
         @AuthenticationPrincipal user: CustomUserDetails,
