@@ -10,7 +10,7 @@ import org.yojung.diary.common.security.CustomUserDetails
 import org.yojung.diary.credittransaction.service.CreditTransactionService
 
 @RestController
-@RequestMapping("/api/credit-transaction")
+@RequestMapping("/api/credit-transactions")
 class CreditTransactionController (
     @Autowired
     private val creditTransactionService: CreditTransactionService

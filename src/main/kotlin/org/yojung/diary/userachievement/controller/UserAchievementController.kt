@@ -11,7 +11,7 @@ import org.yojung.diary.userachievement.dto.UserAchievementUpdateRequest
 import org.yojung.diary.userachievement.service.UserAchievementService
 
 @RestController
-@RequestMapping("/api/user-achievements")
+@RequestMapping("/api/achievements/user-achievements")
 class UserAchievementController(
     private val userAchievementService: UserAchievementService
 ) {

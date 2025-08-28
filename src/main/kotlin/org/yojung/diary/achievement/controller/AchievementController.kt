@@ -52,4 +52,5 @@ class AchievementController {
         val achievementResponse: AchievementResponse = achievementService.getAchievement(code)
         return ResponseEntity.ok<AchievementResponse>(achievementResponse)
     }
+
 }
