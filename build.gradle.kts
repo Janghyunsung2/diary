@@ -42,6 +42,7 @@ dependencies {
     kapt("org.mapstruct:mapstruct-processor:1.5.5.Final")
     annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
 
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
 
     // JWT 관련 의존성 추가
     implementation("io.jsonwebtoken:jjwt-api:0.12.3")
