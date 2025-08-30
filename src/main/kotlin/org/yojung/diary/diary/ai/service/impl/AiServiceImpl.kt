@@ -135,6 +135,8 @@ class AiServiceImpl(
     private fun buildFeedbackResponse(request: FeedbackRequest, map: Map<String, Any>): FeedbackResponse {
         return FeedbackResponse(
             content = map["feedback"] as String,
+            mode = "",
+            imageUrl = null
         )
     }
 }

@@ -17,6 +17,7 @@ import org.yojung.diary.diary.repository.DiaryRepository
 import org.yojung.diary.diary.service.DiaryService
 import org.yojung.diary.feedback.domain.Feedback
 import org.yojung.diary.feedback.dto.FeedbackRequest
+import org.yojung.diary.feedback.dto.FeedbackResponse
 import org.yojung.diary.feedback.exception.FeedbackNotFoundException
 import org.yojung.diary.feedback.mapper.FeedbackMapper
 import org.yojung.diary.feedback.repository.FeedbackRepository
@@ -128,7 +129,16 @@ class DiaryServiceImpl(
         dailyResponse = dailyResponse.copy(content = encryptConverter.convertToEntityAttribute(dailyResponse.content))
 
         val feedback = feedbackRepository.findByDiaryId(dailyId);
-        val feedbackResponse = feedbackMapper.toResponse(feedback)
+
+        val aiMode = feedback?.mode?.let { aiModeRepository.findByMode(it) }?.orElseThrow({FeedbackNotFoundException(dailyResponse.content)})
+
+        val feedbackResponse = feedback?.content?.let {
+            FeedbackResponse(
+                content = it,
+                mode = feedback.mode,
+                imageUrl = aiMode?.getImageUrl(),
+            )
+        }
 
         return DiaryAndFeedbackResponse(dailyResponse, feedbackResponse)
     }
