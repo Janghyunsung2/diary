@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import org.yojung.diary.common.security.CustomUserDetails
 import org.yojung.diary.diary.dto.DiaryRegisterRequest
+import org.yojung.diary.diary.dto.DiaryResponse
 import org.yojung.diary.diary.dto.DiaryUpdateRequest
 import org.yojung.diary.diary.service.DiaryService
 
@@ -68,7 +69,7 @@ class DiaryController (private val diaryService: DiaryService) {
         @AuthenticationPrincipal user: CustomUserDetails,
         @RequestParam("year") year: Int,
         @RequestParam("month") month: Int
-    ) : ResponseEntity<Any> {
+    ) : ResponseEntity<List<DiaryResponse>> {
         val response = diaryService.getDiaryByMonth(user.getId(), year, month)
         return ResponseEntity.ok(response)
     }
