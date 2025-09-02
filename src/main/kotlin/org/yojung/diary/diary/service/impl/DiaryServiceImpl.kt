@@ -24,7 +24,6 @@ import org.yojung.diary.feedback.repository.FeedbackRepository
 import org.yojung.diary.logger.DiscordLogger
 import org.yojung.diary.user.exception.UserNotFoundException
 import org.yojung.diary.user.repository.UserRepository
-import java.time.LocalDate
 import java.time.ZonedDateTime
 
 @Service
@@ -45,6 +44,7 @@ class DiaryServiceImpl(
 ) : DiaryService {
     @Transactional
     override fun createDaily(userId: Long, dailyRegisterRequest: DiaryRegisterRequest): DiaryResponse {
+        val notEncryptContent = dailyRegisterRequest.content
         val encryptedContent = encryptConverter.convertToDatabaseColumn(dailyRegisterRequest.content)
         val dailyRegisterRequest = dailyRegisterRequest.copy(content = encryptedContent)
         val user = userRepository.findById(userId).orElseThrow({ UserNotFoundException(userId) })
@@ -66,7 +66,7 @@ class DiaryServiceImpl(
         val isUseCredit = aiMode.getCreditAmount() > 0
 
         val feedbackResponse = aiService.getFeedback(FeedbackRequest(
-            content = dailyRegisterRequest.content,
+            content = notEncryptContent,
             nickname = dailyRegisterRequest.nickname,
             prompt = aiMode.getPrompt(),
             isUseCredit = isUseCredit,
