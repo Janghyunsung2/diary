@@ -82,7 +82,7 @@ class UserAchievementServiceImpl(
         pageable: Pageable,
         userId: Long
     ): Page<UserAchievementResponse> {
-        return userAchievementRepository.findAllByUserId(pageable, userId)
+        return userAchievementRepository.findByUserId(pageable, userId)
             .stream()
             .map { ua -> userAchievementMapper.toResponse(ua) }
             .let {
