@@ -96,17 +96,19 @@ class AiServiceImpl(
             "temperature" to 0.7
         )
     }
-
     private fun buildPrompt(feedbackRequest: FeedbackRequest): String {
-        return "${feedbackRequest.prompt}\n\n" +
-                "Also, please evaluate the user's diary entry according to the following three criteria, scoring each from 0 to 10:\n" +
-                "1. Emotion score: How genuine and expressive the emotions are\n" +
-                "2. Insight score: The depth of self-reflection and insight\n" +
-                "3. Action score: The level of motivation and willingness to take action\n" +
-                "Return the result in the following JSON format:\n" +
-                "{\"feedback\": \"Your feedback here...\", \"emotion\": 감정점수, \"insight\": 통찰점수, \"action\": 행동점수}.\n" +
-                "All responses must be written in Korean."
+        return """
+        ${feedbackRequest.prompt}
+
+        Please read the user's diary entry carefully and provide a sincere, thoughtful, and supportive response. 
+        The feedback should help the user reflect on their day and feel understood. 
+        Do not include any scores or numerical evaluations. 
+        Only provide natural, well-written feedback. 
+
+        All responses must be written in Korean.
+    """.trimIndent()
     }
+
 
     @Suppress("UNCHECKED_CAST")
     private fun extractFeedbackContent(responseMap: Map<*, *>): String {
