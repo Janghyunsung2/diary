@@ -8,7 +8,7 @@ data class CreditTransactionRegisterRequest(
     @field:NotNull
     val userId: Long,
     @field:NotNull
-    val amount: Int,
+    val amount: Int?,
     @field:NotNull
     val reason: String,
     val achievementCode: String? = null,

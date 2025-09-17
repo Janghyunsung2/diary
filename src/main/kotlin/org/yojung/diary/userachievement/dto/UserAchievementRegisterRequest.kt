@@ -8,9 +8,5 @@ data class UserAchievementRegisterRequest(
     val userId: Long,
     @field:NotNull
     val achievementCode: String,
-    @field:NotNull
-    val currentValue: Int,
-    @field:NotNull
-    val goalValue: Int
 )
 

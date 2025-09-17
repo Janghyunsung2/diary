@@ -9,7 +9,9 @@ import org.yojung.diary.userachievement.dto.UserAchievementUpdateRequest
 interface UserAchievementService {
     fun registerUserAchievement(request: UserAchievementRegisterRequest): UserAchievementResponse
     fun getUserAchievement(id: Long): UserAchievementResponse
-    fun updateUserAchievement(id: Long, request: UserAchievementUpdateRequest): UserAchievementResponse
-    fun getUserAchievements(pageable: Pageable): Page<UserAchievementResponse>
+    fun patchUserAchievement(code: String, userId: Long): UserAchievementResponse
+    fun getUserAchievements(pageable: Pageable, userId: Long): Page<UserAchievementResponse>
+
+    fun grantReward(code: String, userId: Long)
 }
 

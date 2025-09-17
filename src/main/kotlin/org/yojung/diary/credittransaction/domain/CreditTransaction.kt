@@ -28,7 +28,7 @@ class CreditTransaction {
     private var user: User? = null;
 
     @Column(name = "amount", nullable = false)
-    private var amount: Int = 0
+    private var amount: Int? = 0
 
     @Column(name = "reason", nullable = false)
     private var reason: String? = ""
@@ -46,7 +46,7 @@ class CreditTransaction {
 
     constructor(
         user: User,
-        amount: Int,
+        amount: Int?,
         reason: String,
         paymentCode: String? = null,
         achievement: Achievement? = null
@@ -81,7 +81,7 @@ class CreditTransaction {
     }
 
 
-    fun getAmount(): Int {
+    fun getAmount(): Int? {
         return amount
     }
 
