@@ -1,5 +1,6 @@
 package org.yojung.diary.common.security
 
+import io.jsonwebtoken.ExpiredJwtException
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.security.Keys
@@ -11,6 +12,7 @@ import java.util.*
 import java.util.Base64.getDecoder
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
+import kotlin.text.get
 
 @Component
 class JwtTokenProvider(
@@ -76,6 +78,16 @@ class JwtTokenProvider(
     fun getProviderIdFromToken(token: String): String =
         Jwts.parser().setSigningKey(key).build()
             .parseClaimsJws(token).body.subject
+
+
+    fun getClaim(token: String, name: String): Any? {
+        return try {
+            Jwts.parser().setSigningKey(key).build().parseClaimsJws(token).body[name]
+        } catch (e: ExpiredJwtException) {
+            e.claims[name]
+        }
+    }
+
 
     fun getProviderFromToken(token: String): String {
         val claims = Jwts.parser().setSigningKey(key).build()
