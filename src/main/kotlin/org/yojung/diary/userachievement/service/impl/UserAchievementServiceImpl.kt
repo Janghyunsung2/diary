@@ -55,6 +55,15 @@ class UserAchievementServiceImpl(
         userId: Long
     ): UserAchievementResponse {
         var userAchievement = userAchievementRepository.findByCode(code);
+
+
+        while(userAchievement != null && userAchievement.rewardGranted) {
+            val nextCode = userAchievement.achievement?.nextCode;
+            if(nextCode == null) break
+            userAchievement = userAchievementRepository.findByCode(nextCode);
+            if(userAchievement == null) throw UserAchievementNotFoundException(nextCode)
+        }
+
         if(userAchievement == null){
             val request = UserAchievementRegisterRequest(
                 userId = userId,
@@ -62,6 +71,7 @@ class UserAchievementServiceImpl(
             )
             registerUserAchievement(request)
         }
+
         userAchievement?.increaseProgress();
 
         return userAchievementMapper.toResponse(userAchievement);
