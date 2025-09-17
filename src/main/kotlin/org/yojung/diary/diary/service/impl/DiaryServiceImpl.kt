@@ -64,6 +64,18 @@ class DiaryServiceImpl(
             isUseCredit = isUseCredit,
         ))
 
+        if (isUseCredit) {
+            creditTransactionService.registerTransaction(
+                org.yojung.diary.credittransaction.dto.CreditTransactionRegisterRequest(
+                    userId = userId,
+                    amount = -aiMode.getCreditAmount(),
+                    reason = "Used ${aiMode.getMode()} for diary feedback",
+                    achievementCode = null,
+                    paymentCode = null,
+                )
+            )
+        }
+
         val encryptContent = encryptConverter.convertToDatabaseColumn(dailyRegisterRequest.content)
 
         val diary = Diary(

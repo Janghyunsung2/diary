@@ -91,7 +91,7 @@ class AiServiceImpl(
             "model" to model,
             "messages" to listOf(
                 mapOf("role" to "system", "content" to prompt),
-                mapOf("role" to "user", "content" to "${feedbackRequest.nickname}님의 오늘 일기: \"${feedbackRequest.content}\"")
+                mapOf("role" to "user", "content" to "${feedbackRequest.nickname}님의 오늘 일기:\n${feedbackRequest.content}")
             ),
             "temperature" to 0.7
         )
@@ -129,8 +129,7 @@ class AiServiceImpl(
             }
             objectMapper.readValue(jsonPart, object : TypeReference<Map<String, Any>>() {})
         } catch (e: JsonProcessingException) {
-            logger.error("GPT 응답 파싱 실패. 원본 응답: {}", feedback, e)
-            throw GptMessageParsingException(feedbackRequest.content)
+            mapOf("feedback" to feedback.trim())
         }
     }
 
