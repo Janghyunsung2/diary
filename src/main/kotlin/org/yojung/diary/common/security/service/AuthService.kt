@@ -9,6 +9,7 @@ import org.yojung.diary.common.security.JwtTokenProvider
 import org.yojung.diary.common.security.dto.OauthLoginRequest
 import org.yojung.diary.common.security.dto.TokenRequest
 import org.yojung.diary.common.security.dto.TokenResponse
+import kotlin.toString
 
 @Service
 class AuthService(
@@ -39,12 +40,15 @@ class AuthService(
     }
 
     fun refreshToken(tokenRequest: TokenRequest): TokenResponse? {
+        val ac = tokenRequest.accessToken ?: return null
         val rt = tokenRequest.refreshToken ?: return null
         if (!jwtTokenProvider.validateToken(rt)) return null
 
         // 리프레시 토큰 subject로 유저 로드 → 새 인증객체 생성
-        val emailOrOauthId = jwtTokenProvider.getProviderIdFromToken(rt)
-        val userDetails = customUserDetailsService.loadUserByUsername(emailOrOauthId)
+        val provider = jwtTokenProvider.getClaim(ac, "provider")?.toString() ?: return null
+        val providerId = jwtTokenProvider.getClaim(ac, "id")?.toString() ?: return null
+
+        val userDetails = customUserDetailsService.loadByProviderAndProviderId(provider, providerId)
         val authentication = UsernamePasswordAuthenticationToken(
             userDetails, null, userDetails.authorities
         )
