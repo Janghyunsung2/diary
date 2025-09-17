@@ -69,6 +69,8 @@ class JwtTokenProvider(
 
         return Jwts.builder()
             .setSubject(principal.getEmail())
+            .claim("providerId", principal.getEmail())
+            .claim("provider", principal.getProvider()) // provider 정보도 클레임에 추가
             .setIssuedAt(Date())
             .setExpiration(expiryDate)
             .signWith(key, SignatureAlgorithm.HS512)
@@ -88,16 +90,12 @@ class JwtTokenProvider(
         }
     }
 
-
     fun getProviderFromToken(token: String): String {
         val claims = Jwts.parser().setSigningKey(key).build()
             .parseClaimsJws(token).body
         return claims["provider"]?.toString() ?: error("provider claim 없음")
     }
 
-    fun getClaims(token: String) =
-        Jwts.parser().setSigningKey(key).build()
-            .parseClaimsJws(token).body
 
     fun validateToken(token: String): Boolean =
         try {
@@ -106,11 +104,5 @@ class JwtTokenProvider(
         } catch (_: Exception) { false }
 
 
-    fun getAuthentication(token: String): Authentication {
-        val claims = getClaims(token)
-        val provider = claims["provider"]?.toString() ?: error("provider claim 없음")
-        val providerId = claims.subject
-        val userDetails = userDetailsService.loadByProviderAndProviderId(provider, providerId)
-        return UsernamePasswordAuthenticationToken(userDetails, null, userDetails.authorities)
-    }
+
 }

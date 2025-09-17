@@ -40,13 +40,12 @@ class AuthService(
     }
 
     fun refreshToken(tokenRequest: TokenRequest): TokenResponse? {
-        val ac = tokenRequest.accessToken ?: return null
         val rt = tokenRequest.refreshToken ?: return null
         if (!jwtTokenProvider.validateToken(rt)) return null
 
         // 리프레시 토큰 subject로 유저 로드 → 새 인증객체 생성
-        val provider = jwtTokenProvider.getClaim(ac, "provider")?.toString() ?: return null
-        val providerId = jwtTokenProvider.getClaim(ac, "id")?.toString() ?: return null
+        val provider = jwtTokenProvider.getClaim(rt, "provider")?.toString() ?: return null
+        val providerId = jwtTokenProvider.getClaim(rt, "providerId")?.toString() ?: return null
 
         val userDetails = customUserDetailsService.loadByProviderAndProviderId(provider, providerId)
         val authentication = UsernamePasswordAuthenticationToken(
