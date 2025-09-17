@@ -44,34 +44,36 @@ class DiaryServiceImpl(
 ) : DiaryService {
     @Transactional
     override fun createDaily(userId: Long, dailyRegisterRequest: DiaryRegisterRequest): DiaryResponse {
-        val notEncryptContent = dailyRegisterRequest.content
-        val encryptedContent = encryptConverter.convertToDatabaseColumn(dailyRegisterRequest.content)
-        val dailyRegisterRequest = dailyRegisterRequest.copy(content = encryptedContent)
+
         val user = userRepository.findById(userId).orElseThrow({ UserNotFoundException(userId) })
 
-        val diary = Diary(
-            content = dailyRegisterRequest.content,
-            emotionType = dailyRegisterRequest.emotionType,
-            visibility = dailyRegisterRequest.visibility,
-            user = user,
-        )
-
-        val saved = dailyRepository.save(diary)
         val aiMode = aiModeRepository.findById(dailyRegisterRequest.aiModeId)
             .orElseThrow { AiModeNotFoundException(dailyRegisterRequest.aiModeId) }
+
         val creditTransactionByMe = creditTransactionService.getCreditTransactionByMe(userId)
+
         if (creditTransactionByMe < aiMode.getCreditAmount()) {
             throw FeedbackNotFoundException("Insufficient credit to use AI mode")
         }
         val isUseCredit = aiMode.getCreditAmount() > 0
 
         val feedbackResponse = aiService.getFeedback(FeedbackRequest(
-            content = notEncryptContent,
+            content = dailyRegisterRequest.content,
             nickname = dailyRegisterRequest.nickname,
             prompt = aiMode.getPrompt(),
             isUseCredit = isUseCredit,
         ))
 
+        val encryptContent = encryptConverter.convertToDatabaseColumn(dailyRegisterRequest.content)
+
+        val diary = Diary(
+            content = encryptContent,
+            emotionType = dailyRegisterRequest.emotionType,
+            visibility = dailyRegisterRequest.visibility,
+            user = user,
+        )
+
+        val saved = dailyRepository.save(diary)
         val feedback = Feedback(
             diary = saved,
             content = feedbackResponse.content,
