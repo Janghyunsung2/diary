@@ -1,5 +1,4 @@
 name: CI/CD with Docker (Java 21)
-
 on:
   push:
     branches: [ "main" ]
