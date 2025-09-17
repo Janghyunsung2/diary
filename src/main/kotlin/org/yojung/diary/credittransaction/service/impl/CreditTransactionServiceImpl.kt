@@ -57,7 +57,8 @@ class CreditTransactionServiceImpl(
     }
     @Transactional(readOnly = true)
     override fun getCreditTransactionByMe(userId: Long): Int {
-        return creditTransactionRepository.findByUserId(userId)
-            .sumOf { it.getAmount() }
+        return creditTransactionRepository.findByUserId(userId).sumOf(
+            {i -> i.getAmount() ?: 0 }
+        )
     }
 }
