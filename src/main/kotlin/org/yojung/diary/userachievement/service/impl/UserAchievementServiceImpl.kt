@@ -1,6 +1,7 @@
 package org.yojung.diary.userachievement.service.impl
 
 import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -82,12 +83,10 @@ class UserAchievementServiceImpl(
         pageable: Pageable,
         userId: Long
     ): Page<UserAchievementResponse> {
-        return userAchievementRepository.findByUserId(pageable, userId)
-            .stream()
+        val results = userAchievementRepository.findByUserId(pageable, userId)
             .map { ua -> userAchievementMapper.toResponse(ua) }
-            .let {
-                org.springframework.data.domain.PageImpl(it.toList(), pageable, it.count())
-            }
+
+        return results;
     }
 
     override fun grantReward(code: String, userId: Long) {
