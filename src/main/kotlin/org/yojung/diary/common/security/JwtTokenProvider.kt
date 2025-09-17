@@ -64,7 +64,7 @@ class JwtTokenProvider(
 
     fun generateRefreshToken(authentication: Authentication): String {
         val principal = authentication.principal as CustomUserDetails
-        val refreshExpirationMs = jwtExpirationMs * 7
+        val refreshExpirationMs = jwtExpirationMs * 7 * 24
         val expiryDate = Date(System.currentTimeMillis() + refreshExpirationMs)
 
         return Jwts.builder()
